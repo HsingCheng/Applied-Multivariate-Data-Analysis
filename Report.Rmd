@@ -1,0 +1,1147 @@
+---
+title: "report of MSA"
+author: "¥ø´~µÿÅËèØ"
+date: "`r Sys.Date()`"
+output:
+  github_document
+
+---
+
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo=TRUE, error=FALSE)
+```
+
+# §∂≤–
+≥o¨O•—§⁄¶Ë≥Ã§j™∫®T®Æ©MÆaÆx´O¿I§Ω•qPorto Seguro©“¥£•X™∫∞›√D°A•ÿ™∫¨O¨∞§Fπw¥˙•qæ˜¨Oß_∑|ª›≠n´O¿IØ¡Ωﬂ°A
+ß∆±ÊÆ⁄æ⁄≠”§Hæræp≤ﬂ∫D¥£®—ßÛ§Ω•≠™∫´O¿I∂O•Œ°C
+ßÛ∑«ΩT™∫πw¥˙±N®œ•L≠ÃØ‡∞˜∂i§@®B∂q®≠©w®Óª˘ÆÊ°A®√¶≥±Ê®œßÛ¶h•qæ˜´O®Æ¿I
+
+#∑«≥∆§uß@{.tabset .tabset-fade .tabset-pills}
+## ≈™®˙ library
+```{r, message = FALSE}
+# general visualisation
+library('ggplot2') # visualisation
+library('scales') # visualisation
+library('grid') # visualisation
+library('ggthemes') # visualisation
+library('gridExtra') # visualisation
+library('RColorBrewer') # visualisation
+library('corrplot') # visualisation
+library('Rmisc') # visualisation
+
+# general data manipulation
+library('dplyr') # data manipulation
+library('readr') # input/output
+library('data.table') # data manipulation
+library('tibble') # data wrangling
+library('tidyr') # data wrangling
+library('stringr') # string manipulation
+library('forcats') # factor manipulation
+library('rlang') # data manipulation
+
+# specific visualisation
+library('alluvial') # visualisation
+#library('ggfortify') # visualisation
+library('ggrepel') # visualisation
+library('ggridges') # visualisation
+library('VIM') # NAs
+library('plotly') # interactive
+library('ggforce') # visualisation
+
+# modelling
+library('Matrix')
+library('xgboost') # modelling
+library('caret') # modelling
+library('MLmetrics') # gini metric
+```
+## ≈™®˙∏ÍÆ∆
+```{r warning=FALSE, results=FALSE}
+train <- as.tibble(fread('train.csv', na.strings=c("-1","-1.0")))
+test <- as.tibble(fread('test.csv', na.strings=c("-1","-1.0")))
+```
+# ∏ÍÆ∆§∫Æe{.tabset .tabset-fade .tabset-pills}
+## train data
+```{r}
+glimpse(train)
+```
+## test data
+```{r}
+glimpse(test)
+```
+## NA≠»
+```{r}
+sum(is.na(train))
+sum(is.na(test))
+```
+##º∆æ⁄√˛´¨¬‡¥´
+```{r}
+train <- train %>%
+  mutate_at(vars(ends_with("cat")), funs(factor)) %>%
+  mutate_at(vars(ends_with("bin")), funs(as.logical)) %>%
+  mutate(target = as.factor(target))
+test <- test %>%
+  mutate_at(vars(ends_with("cat")), funs(factor)) %>%
+  mutate_at(vars(ends_with("bin")), funs(as.logical))
+```
+#∏ÍÆ∆™∫§¿•¨πœ{.tabset .tabset-fade .tabset-pills}
+
+## Binary features part 1
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 1", out.width="100%"}
+p1 <- train %>%
+  ggplot(aes(ps_ind_06_bin, fill = ps_ind_06_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+
+p2 <- train %>%
+  ggplot(aes(ps_ind_07_bin, fill = ps_ind_07_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p3 <- train %>%
+  ggplot(aes(ps_ind_08_bin, fill = ps_ind_08_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p4 <- train %>%
+  ggplot(aes(ps_ind_09_bin, fill = ps_ind_09_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p5 <- train %>%
+  ggplot(aes(ps_ind_10_bin, fill = ps_ind_10_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p6 <- train %>%
+  ggplot(aes(ps_ind_11_bin, fill = ps_ind_11_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p7 <- train %>%
+  ggplot(aes(ps_ind_12_bin, fill = ps_ind_12_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p8 <- train %>%
+  ggplot(aes(ps_ind_13_bin, fill = ps_ind_13_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+layout <- matrix(c(1,2,3,4,5,6,7,8),2,4,byrow=TRUE)
+multiplot(p1, p2, p3, p4, p5, p6, p7, p8, layout=layout)
+
+```
+
+
+
+
+
+## Binary features part 2
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 2", out.width="100%"}
+p1 <- train %>%
+  ggplot(aes(ps_ind_16_bin, fill = ps_ind_16_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p2 <- train %>%
+  ggplot(aes(ps_ind_17_bin, fill = ps_ind_17_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p3 <- train %>%
+  ggplot(aes(ps_ind_18_bin, fill = ps_ind_18_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p4 <- train %>%
+  ggplot(aes(ps_calc_15_bin, fill = ps_calc_15_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p5 <- train %>%
+  ggplot(aes(ps_calc_16_bin, fill = ps_calc_16_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p6 <- train %>%
+  ggplot(aes(ps_calc_17_bin, fill = ps_calc_17_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p7 <- train %>%
+  ggplot(aes(ps_calc_18_bin, fill = ps_calc_18_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p8 <- train %>%
+  ggplot(aes(ps_calc_19_bin, fill = ps_calc_19_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p9 <- train %>%
+  ggplot(aes(ps_calc_20_bin, fill = ps_calc_20_bin)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+layout <- matrix(c(1,2,3,4,5,6,7,8,9,9),2,5,byrow=TRUE)
+multiplot(p1, p2, p3, p4, p5, p6, p7, p8, p9, layout=layout)
+
+```
+
+
+
+
+## Categorical features part 1
+
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 3", out.width="100%"}
+p1 <- train %>%
+  ggplot(aes(ps_ind_02_cat, fill = ps_ind_02_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+p2 <- train %>%
+  ggplot(aes(ps_ind_04_cat, fill = ps_ind_04_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+p3 <- train %>%
+  ggplot(aes(ps_ind_05_cat, fill = ps_ind_05_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+p4 <- train %>%
+  ggplot(aes(ps_car_01_cat, fill = ps_car_01_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+p5 <- train %>%
+  ggplot(aes(ps_car_02_cat, fill = ps_car_02_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+p6 <- train %>%
+  ggplot(aes(ps_car_03_cat, fill = ps_car_03_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+layout <- matrix(c(1,2,3,4,5,6),3,2,byrow=TRUE)
+multiplot(p1, p2, p3, p4, p5, p6, layout=layout)
+```
+
+
+
+
+## Categorical features part 2
+
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 4", out.width="100%"}
+p1 <- train %>%
+  ggplot(aes(ps_car_04_cat, fill = ps_car_04_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+p2 <- train %>%
+  ggplot(aes(ps_car_05_cat, fill = ps_car_05_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+p3 <- train %>%
+  ggplot(aes(ps_car_06_cat, fill = ps_car_06_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+p4 <- train %>%
+  ggplot(aes(ps_car_07_cat, fill = ps_car_07_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+p5 <- train %>%
+  ggplot(aes(ps_car_08_cat, fill = ps_car_08_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+p6 <- train %>%
+  ggplot(aes(ps_car_09_cat, fill = ps_car_09_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+p7 <- train %>%
+  ggplot(aes(ps_car_10_cat, fill = ps_car_10_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+p8 <- train %>%
+  ggplot(aes(ps_car_11_cat, fill = ps_car_11_cat)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+layout <- matrix(c(1,1,2,3,4,4,5,5,6,6,7,7,8,8,8,8),4,4,byrow=TRUE)
+multiplot(p1, p2, p4, p3, p5, p6, p7, p8, layout=layout)
+```
+
+
+
+## Integer features part 1: "ind" and "car"
+
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 5", out.width="100%"}
+p1 <- train %>%
+  mutate(ps_ind_01 = as.factor(ps_ind_01)) %>%
+  ggplot(aes(ps_ind_01, fill = ps_ind_01)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p2 <- train %>%
+  mutate(ps_ind_03 = as.factor(ps_ind_03)) %>%
+  ggplot(aes(ps_ind_03, fill = ps_ind_03)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p3 <- train %>%
+  mutate(ps_ind_14 = as.factor(ps_ind_14)) %>%
+  ggplot(aes(ps_ind_14, fill = ps_ind_14)) +
+  geom_bar() +
+  scale_y_log10() +
+  theme(legend.position = "none")
+
+p4 <- train %>%
+  mutate(ps_ind_15 = as.factor(ps_ind_15)) %>%
+  ggplot(aes(ps_ind_15, fill = ps_ind_15)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p5 <- train %>%
+  mutate(ps_car_11 = as.factor(ps_car_11)) %>%
+  ggplot(aes(ps_car_11, fill = ps_car_11)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+
+layout <- matrix(c(1,1,2,2,3,4,4,5),2,4,byrow=TRUE)
+multiplot(p1, p2, p3, p4, p5, layout=layout)
+```
+
+
+
+## Integer features part 2: "calc"
+
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 6", out.width="100%"}
+p1 <- train %>%
+  mutate(ps_calc_04 = as.factor(ps_calc_04)) %>%
+  ggplot(aes(ps_calc_04, fill = ps_calc_04)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p2 <- train %>%
+  mutate(ps_calc_05 = as.factor(ps_calc_05)) %>%
+  ggplot(aes(ps_calc_05, fill = ps_calc_05)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p3 <- train %>%
+  mutate(ps_calc_06 = as.factor(ps_calc_06)) %>%
+  ggplot(aes(ps_calc_06, fill = ps_calc_06)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p4 <- train %>%
+  mutate(ps_calc_07 = as.factor(ps_calc_07)) %>%
+  ggplot(aes(ps_calc_07, fill = ps_calc_07)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p5 <- train %>%
+  mutate(ps_calc_08 = as.factor(ps_calc_08)) %>%
+  ggplot(aes(ps_calc_08, fill = ps_calc_08)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p6 <- train %>%
+  mutate(ps_calc_09 = as.factor(ps_calc_09)) %>%
+  ggplot(aes(ps_calc_09, fill = ps_calc_09)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p7 <- train %>%
+  ggplot(aes(ps_calc_10, fill = ps_calc_10)) +
+  geom_histogram(fill = "blue", binwidth = 1) +
+  theme(legend.position = "none")
+
+p8 <- train %>%
+  ggplot(aes(ps_calc_11, fill = ps_calc_11)) +
+  geom_histogram(fill = "blue", binwidth = 1) +
+  theme(legend.position = "none")
+
+p9 <- train %>%
+  mutate(ps_calc_12 = as.factor(ps_calc_12)) %>%
+  ggplot(aes(ps_calc_12, fill = ps_calc_12)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p10 <- train %>%
+  mutate(ps_calc_13 = as.factor(ps_calc_13)) %>%
+  ggplot(aes(ps_calc_13, fill = ps_calc_13)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+p11 <- train %>%
+  ggplot(aes(ps_calc_14, fill = ps_calc_14)) +
+  geom_histogram(fill = "blue", binwidth = 1) +
+  theme(legend.position = "none")
+
+layout <- matrix(c(1,2,3,4,5,6,7,8,9,10,11,11),3,4,byrow=TRUE)
+multiplot(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, layout=layout)
+```
+
+
+
+
+## Float features part 1: "reg" and "calc"
+
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 7", out.width="100%"}
+p1 <- train %>%
+  ggplot(aes(ps_reg_01, fill = ps_reg_01)) +
+  geom_histogram(fill = "dark green", binwidth = 0.1) +
+  theme(legend.position = "none")
+
+p2 <- train %>%
+  ggplot(aes(ps_reg_02, fill = ps_reg_02)) +
+  geom_histogram(fill = "dark green", binwidth = 0.1) +
+  theme(legend.position = "none")
+
+p3 <- train %>%
+  ggplot(aes(ps_reg_03, fill = ps_reg_03)) +
+  geom_histogram(fill = "dark green", binwidth = 0.1) +
+  theme(legend.position = "none")
+
+p4 <- train %>%
+  ggplot(aes(ps_calc_01, fill = ps_calc_01)) +
+  geom_histogram(fill = "blue", binwidth = 0.1) +
+  theme(legend.position = "none")
+
+p5 <- train %>%
+  ggplot(aes(ps_calc_02, fill = ps_calc_02)) +
+  geom_histogram(fill = "blue", binwidth = 0.1) +
+  theme(legend.position = "none")
+
+p6 <- train %>%
+  ggplot(aes(ps_calc_03, fill = ps_calc_03)) +
+  geom_histogram(fill = "blue", binwidth = 0.1) +
+  theme(legend.position = "none")
+
+
+
+layout <- matrix(c(1,2,3,4,5,6),2,3,byrow=TRUE)
+multiplot(p1, p2, p3, p4, p5, p6, layout=layout)
+```
+
+
+
+## Float features part 2: "car"
+
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 8", out.width="100%"}
+p1 <- train %>%
+  ggplot(aes(ps_car_12, fill = ps_car_12)) +
+  geom_histogram(binwidth = 0.05) +
+  theme(legend.position = "none")
+
+p2 <- train %>%
+  ggplot(aes(ps_car_13, fill = ps_car_13)) +
+  geom_histogram(binwidth = 0.1) +
+  theme(legend.position = "none")
+
+p3 <- train %>%
+  ggplot(aes(ps_car_14, fill = ps_car_14)) +
+  geom_histogram(binwidth = 0.01) +
+  theme(legend.position = "none")
+
+p4 <- train %>%
+  ggplot(aes(ps_car_15, fill = ps_car_15)) +
+  geom_histogram(binwidth = 0.1) +
+  theme(legend.position = "none")
+
+layout <- matrix(c(1,2,3,4),2,2,byrow=TRUE)
+multiplot(p1, p2, p3, p4, layout=layout)
+```
+
+
+
+## Target variable
+
+
+```{r split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 9", fig.height=3.5, out.width="100%"}
+train %>%
+  ggplot(aes(target, fill = target)) +
+  geom_bar() +
+  theme(legend.position = "none")
+```
+
+We find:
+
+
+```{r}
+train %>%
+  group_by(target) %>%
+  summarise(percentage = n()/nrow(train)*100)
+```
+# ≠”ßO∞—º∆™∫Ø¡Ωﬂ≤v{.tabset .tabset-fade .tabset-pills}
+
+## Binary features part 1
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 10", out.width="100%"}
+p1 <- train %>%
+  group_by(ps_ind_06_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_06_bin,`1`/(`1`+`0`)*100, fill = ps_ind_06_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p2 <- train %>%
+  group_by(ps_ind_07_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_07_bin,`1`/(`1`+`0`)*100, fill = ps_ind_07_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p3 <- train %>%
+  group_by(ps_ind_08_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_08_bin,`1`/(`1`+`0`)*100, fill = ps_ind_08_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+p4 <- train %>%
+  group_by(ps_ind_09_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_09_bin,`1`/(`1`+`0`)*100, fill = ps_ind_09_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p5 <- train %>%
+  group_by(ps_ind_10_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_10_bin,`1`/(`1`+`0`)*100, fill = ps_ind_10_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p6 <- train %>%
+  group_by(ps_ind_11_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_11_bin,`1`/(`1`+`0`)*100, fill = ps_ind_11_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p7 <- train %>%
+  group_by(ps_ind_12_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_12_bin,`1`/(`1`+`0`)*100, fill = ps_ind_12_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p8 <- train %>%
+  group_by(ps_ind_13_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_13_bin,`1`/(`1`+`0`)*100, fill = ps_ind_13_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+layout <- matrix(c(1,2,3,4,5,6,7,8),2,4,byrow=TRUE)
+multiplot(p1, p2, p3, p4, p5, p6, p7, p8, layout=layout)
+p1 <- 1; p2 <- 1; p3 <- 1; p4 <- 1; p5 <- 1; p6 <- 1; p7 <- 1; p8 <- 1
+```
+
+
+
+## Binary features part 2
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 11", out.width="100%"}
+p1 <- train %>%
+  group_by(ps_ind_16_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_16_bin,`1`/(`1`+`0`)*100, fill = ps_ind_16_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p2 <- train %>%
+  group_by(ps_ind_17_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_17_bin,`1`/(`1`+`0`)*100, fill = ps_ind_17_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p3 <- train %>%
+  group_by(ps_ind_18_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_18_bin,`1`/(`1`+`0`)*100, fill = ps_ind_18_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p4 <- train %>%
+  group_by(ps_calc_15_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_calc_15_bin,`1`/(`1`+`0`)*100, fill = ps_calc_15_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p5 <- train %>%
+  group_by(ps_calc_16_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_calc_16_bin,`1`/(`1`+`0`)*100, fill = ps_calc_16_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p6 <- train %>%
+  group_by(ps_calc_17_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_calc_17_bin,`1`/(`1`+`0`)*100, fill = ps_calc_17_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p7 <- train %>%
+  group_by(ps_ind_18_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_18_bin,`1`/(`1`+`0`)*100, fill = ps_ind_18_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p8 <- train %>%
+  group_by(ps_calc_19_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_calc_19_bin,`1`/(`1`+`0`)*100, fill = ps_calc_19_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p9 <- train %>%
+  group_by(ps_calc_20_bin, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_calc_20_bin,`1`/(`1`+`0`)*100, fill = ps_calc_20_bin))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+layout <- matrix(c(1,2,3,4,5,6,7,8,9,9),2,5,byrow=TRUE)
+multiplot(p1, p2, p3, p4, p5, p6, p7, p8, p9, layout=layout)
+p1 <- 1; p2 <- 1; p3 <- 1; p4 <- 1; p5 <- 1; p6 <- 1; p7 <- 1; p8 <- 1
+```
+
+
+
+## Categorical features part 1
+
+
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 12", out.width="100%"}
+
+p1 <-  train %>%
+  group_by(ps_ind_02_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_02_cat,`1`/(`1`+`0`)*100, fill = ps_ind_02_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p2 <- train %>%
+  group_by(ps_ind_04_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_04_cat,`1`/(`1`+`0`)*100, fill = ps_ind_04_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p3 <- train %>%
+  group_by(ps_ind_05_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_05_cat,`1`/(`1`+`0`)*100, fill = ps_ind_05_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p4 <- train %>%
+  group_by(ps_car_01_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_car_01_cat,`1`/(`1`+`0`)*100, fill = ps_car_01_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p5 <- train %>%
+  group_by(ps_car_02_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_car_02_cat,`1`/(`1`+`0`)*100, fill = ps_car_02_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p6 <- train %>%
+  group_by(ps_car_03_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_car_03_cat,`1`/(`1`+`0`)*100, fill = ps_car_03_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+layout <- matrix(c(1,2,3,4,5,6),3,2,byrow=TRUE)
+multiplot(p1, p2, p3, p4, p5, p6, layout=layout)
+p1 <- 1; p2 <- 1; p3 <- 1; p4 <- 1; p5 <- 1; p6 <- 1; p7 <- 1; p8 <- 1
+```
+
+
+
+## Categorical features part 2
+
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 12", out.width="100%"}
+
+p1 <- train %>%
+  group_by(ps_car_04_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_car_04_cat,`1`/(`1`+`0`)*100, fill = ps_car_04_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p2 <- train %>%
+  group_by(ps_car_05_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_car_05_cat,`1`/(`1`+`0`)*100, fill = ps_car_05_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p3 <- train %>%
+  group_by(ps_car_06_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_car_06_cat,`1`/(`1`+`0`)*100, fill = ps_car_06_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p4 <- train %>%
+  group_by(ps_car_07_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_car_07_cat,`1`/(`1`+`0`)*100, fill = ps_car_07_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p5 <- train %>%
+  group_by(ps_car_08_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_car_08_cat,`1`/(`1`+`0`)*100, fill = ps_car_08_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p6 <- train %>%
+  group_by(ps_car_09_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_car_09_cat,`1`/(`1`+`0`)*100, fill = ps_car_09_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p7 <- train %>%
+  group_by(ps_car_10_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_car_10_cat,`1`/(`1`+`0`)*100, fill = ps_car_10_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p8 <- train %>%
+  group_by(ps_car_11_cat, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_car_11_cat,`1`/(`1`+`0`)*100, fill = ps_car_11_cat))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+layout <- matrix(c(1,1,2,3,4,4,5,5,6,6,7,7,8,8,8,8),4,4,byrow=TRUE)
+multiplot(p1, p2, p4, p3, p5, p6, p7, p8, layout=layout)
+p1 <- 1; p2 <- 1; p3 <- 1; p4 <- 1; p5 <- 1; p6 <- 1; p7 <- 1; p8 <- 1
+```
+
+
+
+## Integer features part 1
+
+
+```{r split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 13", out.width="100%"}
+
+p1 <- train %>%
+  group_by(ps_ind_01, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_01,`1`/(`1`+`0`)*100, fill = ps_ind_01))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+  
+p2 <- train %>%
+  group_by(ps_ind_03, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_03,`1`/(`1`+`0`)*100, fill = ps_ind_03))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+  
+p3 <- train %>%
+  group_by(ps_ind_14, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_14,`1`/(`1`+`0`)*100, fill = ps_ind_14))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+  
+p4 <- train %>%
+  group_by(ps_ind_15, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_ind_15,`1`/(`1`+`0`)*100, fill = ps_ind_15))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+  
+p5 <- train %>%
+  group_by(ps_car_11, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_car_11,`1`/(`1`+`0`)*100, fill = ps_car_11))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+layout <- matrix(c(1,1,2,2,3,4,4,5),2,4,byrow=TRUE)
+multiplot(p1, p2, p3, p4, p5, layout=layout)
+```
+
+
+
+
+## Integer features part 2
+
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 14", out.width="100%"}
+
+p1 <- train %>%
+  group_by(ps_calc_04, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_calc_04,`1`/(`1`+`0`)*100, fill = ps_calc_04))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+  
+p2 <- train %>%
+  group_by(ps_calc_05, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_calc_05,`1`/(`1`+`0`)*100, fill = ps_calc_05))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p3 <- train %>%
+  group_by(ps_calc_06, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_calc_06,`1`/(`1`+`0`)*100, fill = ps_calc_06))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+  
+p4 <- train %>%
+  group_by(ps_calc_07, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_calc_07,`1`/(`1`+`0`)*100, fill = ps_calc_07))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+  
+p5 <- train %>%
+  group_by(ps_calc_08, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_calc_08,`1`/(`1`+`0`)*100, fill = ps_calc_08))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p6 <- train %>%
+  group_by(ps_calc_09, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_calc_09,`1`/(`1`+`0`)*100, fill = ps_calc_09))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p7 <- train %>%
+  ggplot(aes(ps_calc_10, fill = target)) +
+  geom_density(alpha = 0.5, bw = 0.4) +
+  theme(legend.position = "none")
+
+p8 <- train %>%
+  ggplot(aes(ps_calc_11, fill = target)) +
+  geom_density(alpha = 0.5, bw = 0.4) +
+  theme(legend.position = "none")
+
+p9 <- train %>%
+  group_by(ps_calc_12, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_calc_12,`1`/(`1`+`0`)*100, fill = ps_calc_12))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p10 <- train %>%
+  group_by(ps_calc_13, target) %>%
+  count() %>%
+  spread(target, n) %>%
+  ggplot(aes(ps_calc_13,`1`/(`1`+`0`)*100, fill = ps_calc_13))+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none") +
+  labs(y = "Claims [%]")
+
+p11 <- train %>%
+  ggplot(aes(ps_calc_14, fill = target)) +
+  geom_density(alpha = 0.5, bw = 0.4)
+
+layout <- matrix(c(1,2,3,4,5,6,7,8,9,10,11,11),3,4,byrow=TRUE)
+multiplot(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, layout=layout)
+p1 <- 1; p2 <- 1; p3 <- 1; p4 <- 1; p5 <- 1; p6 <- 1; p7 <- 1; p8 <- 1; p9 <- 1; p10 <- 1; p11 <- 1
+```
+
+
+
+## Float features part 1
+
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 15", out.width="100%"}
+p1 <- train %>%
+  ggplot(aes(ps_reg_01, fill = target)) +
+  geom_density(alpha = 0.5, bw = 0.05) +
+  theme(legend.position = "none")
+
+p2 <- train %>%
+  ggplot(aes(ps_reg_02, fill = target)) +
+  geom_density(alpha = 0.5, bw = 0.05) +
+  theme(legend.position = "none")
+
+p3 <- train %>%
+  ggplot(aes(ps_reg_03, fill = target)) +
+  geom_density(alpha = 0.5, bw = 0.05) +
+  theme(legend.position = "none")
+
+p4 <- train %>%
+  ggplot(aes(ps_calc_01, fill = target)) +
+  geom_density(alpha = 0.5, bw = 0.05) +
+  theme(legend.position = "none")
+
+p5 <- train %>%
+  ggplot(aes(ps_calc_02, fill = target)) +
+  geom_density(alpha = 0.5, bw = 0.05) +
+  theme(legend.position = "none")
+
+p6 <- train %>%
+  ggplot(aes(ps_calc_03, fill = target)) +
+  geom_density(alpha = 0.5, bw = 0.05)
+
+layout <- matrix(c(1,2,3,4,5,6),2,3,byrow=TRUE)
+multiplot(p1, p2, p3, p4, p5, p6, layout=layout)
+```
+
+
+
+## Float features part 2
+
+```{r  split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 16", out.width="100%"}
+p1 <- train %>%
+  ggplot(aes(ps_car_12, fill = target)) +
+  geom_density(alpha = 0.5, bw = 0.05) +
+  theme(legend.position = "none")
+
+p2 <- train %>%
+  ggplot(aes(ps_car_13, fill = target)) +
+  geom_density(alpha = 0.5, bw = 0.05) +
+  theme(legend.position = "none")
+
+p3 <- train %>%
+  ggplot(aes(ps_car_14, fill = target)) +
+  geom_density(alpha = 0.5, bw = 0.05) +
+  theme(legend.position = "none")
+
+p4 <- train %>%
+  ggplot(aes(ps_car_15, fill = target)) +
+  geom_density(alpha = 0.5, bw = 0.1) +
+  theme(legend.position = "none")
+
+layout <- matrix(c(1,2,3,4),2,2,byrow=TRUE)
+multiplot(p1, p2, p3, p4, layout=layout)
+```
+# XGB
+
+
+##Normalized Gini Coefficient
+
+```{r}
+xgb_normalizedgini <- function(preds, dtrain){
+  actual <- getinfo(dtrain, "label")
+  score <- NormalizedGini(preds,actual)
+  return(list(metric = "NormalizedGini", value = score))
+}
+```
+##feature engineering
+
+```{r}
+train <- fread(paste0("train.csv"), sep=",", na.strings = "", stringsAsFactors=T)
+test <- fread(paste0("test.csv"), sep=",", na.strings = "", stringsAsFactors=T)
+test$target <- NA
+data <- rbind(train, test)
+rm(train,test);gc()
+data[-ps_calc_01]
+data[-ps_calc_02]
+data[-ps_calc_03]
+data[, ps_ind_14_ps_ind_12_bin := ps_ind_14*ps_ind_12_bin]
+data[, ps_ind_17_bin_ps_ind_16_bin := ps_ind_17_bin*ps_ind_16_bin]
+data[, ps_reg_03_ps_reg_02 := ps_reg_03*ps_reg_02]
+data[, ps_car_15_ps_car_08_cat := ps_car_15*ps_car_08_cat]
+data[, ps_car_14_ps_car_12 := ps_car_14*ps_car_12 ]
+data[, ps_car_13_ps_reg_03 := ps_car_13*ps_reg_03]
+data[, ps_reg_mult := ps_reg_01*ps_reg_02*ps_reg_03]
+data[, ps_ind_bin_sum := ps_ind_06_bin+ps_ind_07_bin+ps_ind_08_bin+ps_ind_09_bin+ps_ind_10_bin+ps_ind_11_bin+ps_ind_12_bin+ps_ind_13_bin+ps_ind_16_bin+ps_ind_17_bin+ps_ind_18_bin]
+
+```
+##XGBoost advance preparation
+```{r}
+
+cvFolds <- createFolds(data$target[!is.na(data$target)], k=5, list=TRUE, returnTrain=FALSE)
+varnames <- setdiff(colnames(data), c("id", "target"))
+train_sparse <- Matrix(as.matrix(data[!is.na(target), varnames, with=F]), sparse=TRUE)
+test_sparse <- Matrix(as.matrix(data[is.na(target), varnames, with=F]), sparse=TRUE)
+y_train <- data[!is.na(target),target]
+test_ids <- data[is.na(target),id]
+dtrain <- xgb.DMatrix(data=train_sparse, label=y_train)
+dtest <- xgb.DMatrix(data=test_sparse)
+```
+XGBoost parameters and fitting
+```{r}
+
+param <- list(booster="gbtree",
+              objective="binary:logistic", 
+              eta = 0.02,
+              gamma = 1,
+              max_depth = 6, 
+              min_child_weight = 1,
+              subsample = 0.8,
+              colsample_bytree = 0.8,
+              seed = 123
+)
+xgb_cv <- xgb.cv(data = dtrain,
+                  params = param,
+                 nrounds = 5000,
+                  feval = xgb_normalizedgini,
+                 maximize = TRUE,
+                prediction = TRUE,
+               folds = cvFolds,
+              print_every_n = 25,
+             early_stopping_round = 30,
+           set.seed(123)
+           )
+best_iter <- xgb_cv$best_iteration
+
+xgb_model <- xgb.train(data = dtrain,
+                       params = param,
+                       nrounds = best_iter,
+                       feval = xgb_normalizedgini,
+                       maximize = TRUE,
+                       watchlist = list(train = dtrain),
+                       verbose = 1,
+                       print_every_n = 25,
+                       set.seed(123)
+
+)
+
+names <- dimnames(train_sparse)[[2]]
+importance_matrix <- xgb.importance(names, model=xgb_model)
+xgb.plot.importance(importance_matrix)
+
+preds <- data.table(id=test_ids, target=predict(xgb_model,dtest))
+write.table(preds, "submission.csv", sep=",", dec=".", quote=FALSE, row.names=FALSE)
+```
+
+
+
+
+
